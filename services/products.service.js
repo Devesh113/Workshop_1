@@ -35,8 +35,50 @@ const insertIntoProducts = async({name,price}) => {
     return newProduct
 }
 
+const putIntoProduct = async(newData) => {
+    let data = await database.delayReadData()
+    let updatedProduct = data.map((el)=>{
+        if (el.id===newData.id){
+            return newData
+        }
+        return el
+    })
+    await database.writeIntoFile(updatedProduct)
+    return newData
+} 
+
+const patchIntoProduct = async(data,id) => {
+    product = await database.delayReadData()
+    let feild = ["name","price"]
+    let newData
+    let updatedProduct = product.map((el)=>{
+        if (el.id===id){
+            feild.forEach((keys)=>{
+                if (data[keys]){
+                    el[keys]=data[keys]
+                }
+            })
+            newData=el
+        }
+        return el
+    })
+    await database.writeIntoFile(updatedProduct)
+    return newData
+} 
+
+const deleteFromProduct = async(id) => {
+    let data = await database.delayReadData()
+    let deletedData = data.find(el => el.id===id)
+    let newData = data.filter(el => el.id!==id)
+    await database.writeIntoFile(newData)
+    return deletedData
+}
+
 module.exports = {
     QueryProduct,
     findProductId,
-    insertIntoProducts
+    insertIntoProducts,
+    putIntoProduct,
+    patchIntoProduct,
+    deleteFromProduct
 }

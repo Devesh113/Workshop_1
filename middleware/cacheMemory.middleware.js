@@ -7,7 +7,7 @@ const productsCache = async(req,res,next) => {
 
     if (req.method!=="GET"){
         Object.keys(cache).forEach((keys)=>{
-            if (cache[keys].startsWith("products")){
+            if (cache[keys] && keys.startsWith("/products")){
                 delete cache[keys]
             }
         })
@@ -21,7 +21,7 @@ const productsCache = async(req,res,next) => {
     }
 
     else if (cachedData && Date.now()>cachedData.expiresAt){
-        console.log("new value assgined")
+        // console.log("new value assgined")
         delete cache[url] 
     }
 

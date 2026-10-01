@@ -9,4 +9,10 @@ productRouter.get("/:id",productMiddleware.productsCache,controller.getProductId
 
 productRouter.post("/",productMiddleware.validatePostReq,productMiddleware.productsCache,controller.insertProducts)
 
+productRouter.put("/:id",productMiddleware.productsCache,controller.putProduct)
+
+productRouter.patch("/:id",productMiddleware.productsCache,controller.patchProduct)
+
+productRouter.delete("/:id",productMiddleware.productsCache,controller.deleteProduct)
+
 module.exports = productRouter

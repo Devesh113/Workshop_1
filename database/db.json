@@ -1,8 +1,8 @@
 [
   {
     "id": 1,
-    "name": "Keyboard",
-    "price": 49.99
+    "name": "keyboard",
+    "price": 999
   },
   {
     "id": 2,
@@ -11,8 +11,8 @@
   },
   {
     "id": 3,
-    "name": "Monitor",
-    "price": 199
+    "name": "Simple monitor",
+    "price": 50000
   },
   {
     "id": 4,
