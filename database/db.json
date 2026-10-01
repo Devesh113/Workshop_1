@@ -28,5 +28,15 @@
     "id": 6,
     "name": "graphic-card",
     "price": 12500
+  },
+  {
+    "id": 7,
+    "name": "desktop",
+    "price": 15000
+  },
+  {
+    "id": 8,
+    "name": "xerox machine",
+    "price": 15000000
   }
 ]

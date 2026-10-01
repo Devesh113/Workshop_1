@@ -20,7 +20,7 @@ const QueryProduct = async(query) => {
 
 const findProductId = async(id) => {
     const data = await database.delayReadData()
-    return findProductId.find(el => el.id===id)
+    return data.find(el => el.id===id)
 }
 
 const insertIntoProducts = async({name,price}) => {
