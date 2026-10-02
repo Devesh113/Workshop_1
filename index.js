@@ -1,11 +1,20 @@
-const express = require("express")
-const app = express()
-const port = 3000
-const productRouter = require("./routes/products.router")
+const express = require("express");
+const application = express();
+const listenPort = 3000;
+const productsRouter = require("./routes/products.router");
 
-app.use(express.json())
-app.use('/products',productRouter)
+application.use(express.json());
+application.use("/products", productsRouter);
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-})
+application.use((error, request, response, next) => {
+  console.error(error);
+  if (response.headersSent) {
+    return next(error);
+  }
+
+  response.status(500).json({ error: "Internal server error" });
+});
+
+application.listen(listenPort, () => {
+  console.log(`Product service listening on port ${listenPort}`);
+});

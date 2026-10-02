@@ -1,19 +1,19 @@
-const express = require("express")
-const productRouter = express.Router()
-const controller = require("../controllers/products.controller")
-const productMiddleware = require("../middleware/cacheMemory.middleware")
-const productValidations = require("../middleware/validation.middleware")
+const express = require("express");
+const productsRouter = express.Router();
+const productsController = require("../controllers/products.controller");
+const cacheMiddleware = require("../middleware/cacheMemory.middleware");
+const requestValidation = require("../middleware/validation.middleware");
 
-productRouter.get('/',productMiddleware.productsCache, controller.getProducts)
+productsRouter.get("/", cacheMiddleware.cacheProducts, productsController.getProducts);
 
-productRouter.get("/:id",productMiddleware.productsCache,controller.getProductId)
+productsRouter.get("/:id", cacheMiddleware.cacheProducts, productsController.getProductById);
 
-productRouter.post("/",productValidations.validatePostReq,productMiddleware.productsCache,controller.insertProducts)
+productsRouter.post("/", requestValidation.validateProduct, cacheMiddleware.cacheProducts, productsController.createProduct);
 
-productRouter.put("/:id",productMiddleware.productsCache,controller.putProduct)
+productsRouter.put("/:id", cacheMiddleware.cacheProducts, productsController.replaceProduct);
 
-productRouter.patch("/:id",productMiddleware.productsCache,controller.patchProduct)
+productsRouter.patch("/:id", cacheMiddleware.cacheProducts, productsController.updateProductFields);
 
-productRouter.delete("/:id",productMiddleware.productsCache,controller.deleteProduct)
+productsRouter.delete("/:id", cacheMiddleware.cacheProducts, productsController.removeProduct);
 
-module.exports = productRouter
+module.exports = productsRouter;

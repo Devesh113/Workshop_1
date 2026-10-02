@@ -1,84 +1,87 @@
-const database = require("../database/db")
+const database = require("../database/db");
 
-const QueryProduct = async(query) => {
-    let filterProduct = await database.delayReadData()
-    let {name,minPrice,maxPrice} = query
-    minPrice = Number(minPrice)
-    maxPrice = Number(maxPrice)
-    
-    if (name && name.trim()!==""){
-        filterProduct = filterProduct.filter(el => el.name.toLowerCase().includes(name.toLowerCase()))
-    }
-    if (minPrice && typeof minPrice === 'number' && Number.isFinite(minPrice)){
-        filterProduct = filterProduct.filter(el => el.price>=minPrice)
-    }
-    if (maxPrice && typeof maxPrice === 'number' && Number.isFinite(maxPrice)){
-        filterProduct = filterProduct.filter(el => el.price<=maxPrice)
-    }
-    return filterProduct
-}
+const queryProducts = async (queryParameters) => {
+    let matchingProducts = await database.readProducts();
+    const { name, minPrice, maxPrice } = queryParameters;
+    const lowerBound = Number(minPrice);
+    const upperBound = Number(maxPrice);
 
-const findProductId = async(id) => {
-    const data = await database.delayReadData()
-    return data.find(el => el.id===id)
-}
+    if (typeof name === "string" && name.trim() !== "") {
+        const searchTerm = name.toLowerCase();
+        matchingProducts = matchingProducts.filter((product) =>
+            product.name.toLowerCase().includes(searchTerm)
+        );
+    }
+    if (minPrice !== undefined && Number.isFinite(lowerBound)) {
+        matchingProducts = matchingProducts.filter((product) => product.price >= lowerBound);
+    }
+    if (maxPrice !== undefined && Number.isFinite(upperBound)) {
+        matchingProducts = matchingProducts.filter((product) => product.price <= upperBound);
+    }
+    return matchingProducts;
+};
 
-const insertIntoProducts = async({name,price}) => {
-    let data = await database.delayReadData()
-    newProduct = {
-        id : data.length+1, 
-        name, 
+const findProductById = async (productId) => {
+    const products = await database.readProducts();
+    return products.find((product) => product.id === productId);
+};
+
+const createProduct = async ({ name, price }) => {
+    const products = await database.readProducts();
+    const productToAdd = {
+        id: products.length + 1,
+        name,
         price
-    }
-    data.push(newProduct)
-    await database.writeIntoFile(data)
-    return newProduct
-}
+    };
+    products.push(productToAdd);
+    await database.writeProducts(products);
+    return productToAdd;
+};
 
-const putIntoProduct = async(newData) => {
-    let data = await database.delayReadData()
-    let updatedProduct = data.map((el)=>{
-        if (el.id===newData.id){
-            return newData
+const replaceProduct = async (replacement) => {
+    const products = await database.readProducts();
+    const replacedProducts = products.map((product) => {
+        if (product.id === replacement.id) {
+            return replacement;
         }
-        return el
-    })
-    await database.writeIntoFile(updatedProduct)
-    return newData
-} 
+        return product;
+    });
+    await database.writeProducts(replacedProducts);
+    return replacement;
+};
 
-const patchIntoProduct = async(data,id) => {
-    product = await database.delayReadData()
-    let feild = ["name","price"]
-    let newData
-    let updatedProduct = product.map((el)=>{
-        if (el.id===id){
-            feild.forEach((keys)=>{
-                if (data[keys]){
-                    el[keys]=data[keys]
+const updateProductFields = async (changes, productId) => {
+    const products = await database.readProducts();
+    const editableFields = ["name", "price"];
+    let updatedProduct;
+    const updatedProducts = products.map((product) => {
+        if (product.id === productId) {
+            editableFields.forEach((fieldName) => {
+                if (changes[fieldName] !== undefined) {
+                    product[fieldName] = changes[fieldName];
                 }
-            })
-            newData=el
+            });
+            updatedProduct = product;
         }
-        return el
-    })
-    await database.writeIntoFile(updatedProduct)
-    return newData
-} 
+        return product;
+    });
+    await database.writeProducts(updatedProducts);
+    return updatedProduct;
+};
 
-const deleteFromProduct = async(id) => {
-    let data = await database.delayReadData()
-    let deletedData = data.find(el => el.id===id)
-    let newData = data.filter(el => el.id!==id)
-    await database.writeIntoFile(newData)
-    return deletedData
-}
+const removeProduct = async (productId) => {
+    const products = await database.readProducts();
+    const removedProduct = products.find((product) => product.id === productId);
+    const remainingProducts = products.filter((product) => product.id !== productId);
+    await database.writeProducts(remainingProducts);
+    return removedProduct;
+};
 
 module.exports = {
-    QueryProduct,
-    findProductId,
-    insertIntoProducts,
-    putIntoProduct,
-    patchIntoProduct,
-    deleteFromProduct
-}
+    queryProducts,
+    findProductById,
+    createProduct,
+    replaceProduct,
+    updateProductFields,
+    removeProduct
+};

@@ -1,11 +1,11 @@
-const validatePostReq = (req,res,next) => {
-    const {name,price} = req.body
-    if (name===undefined || name.trim()==="" || !Number.isInteger(price)){
-        return res.status(400).send("error")
+const validateProduct = (request, response, next) => {
+    const { name, price } = request.body;
+    if (typeof name !== "string" || name.trim() === "" || !Number.isFinite(price)) {
+        return response.status(400).json({ error: "A name and numeric price are required" });
     }
-    next()
-}
+    next();
+};
 
 module.exports = {
-    validatePostReq
-}
+    validateProduct
+};

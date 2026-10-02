@@ -1,27 +1,29 @@
-const fs = require("fs/promises")
-const path = require("path")
-const filePath = path.join(__dirname,"db.json")
+const fileSystem = require("fs/promises");
+const path = require("path");
+const productsFile = path.join(__dirname, "db.json");
 
-const readData = async() => {
+const readProducts = async () => {
     try {
-        let RawData = await fs.readFile(filePath,'utf-8')
-        return JSON.parse(RawData)
+        const fileContents = await fileSystem.readFile(productsFile, "utf-8");
+        const parsedProducts = JSON.parse(fileContents);
+        if (!Array.isArray(parsedProducts)) {
+            throw new Error("Product data must be an array");
+        }
+        return parsedProducts;
+    } catch (error) {
+        throw new Error(`Unable to read product data: ${error.message}`, { cause: error });
     }
-    catch (err) {
-        return {"error" : `found error on reading file ${err}`}
+};
+
+const writeProducts = async (products) => {
+    try {
+        await fileSystem.writeFile(productsFile, JSON.stringify(products, null, 2));
+    } catch (error) {
+        throw new Error(`Unable to save product data: ${error.message}`, { cause: error });
     }
-}
-const delayReadData = async() => {
-    await new Promise((res,rej)=>{
-        setTimeout(res,(5*1000))
-    })
-    return await readData()
-}
-const writeIntoFile = (data) => {
-    return fs.writeFile(filePath,JSON.stringify(data,null,2))
-}
+};
 
 module.exports = {
-    delayReadData,
-    writeIntoFile
-}
+    readProducts,
+    writeProducts
+};

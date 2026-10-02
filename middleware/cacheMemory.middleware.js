@@ -1,42 +1,36 @@
-const delayReadData = require("../database/db")
-const cache = {}
+const responseCache = new Map();
+const cacheLifetimeMs = 60 * 1000;
 
-const productsCache = async(req,res,next) => {
-    let url = req.originalUrl
-    let cachedData = cache[url]
+const cacheProducts = (request, response, next) => {
+    const cacheKey = request.originalUrl;
 
-    if (req.method!=="GET"){
-        Object.keys(cache).forEach((keys)=>{
-            if (cache[keys] && keys.startsWith("/products")){
-                delete cache[keys]
-            }
-        })
-        next()
-        return
+    if (request.method !== "GET") {
+        responseCache.clear();
+        return next();
     }
 
-    if (cachedData && Date.now()<=cachedData.expiresAt){
-        res.set("cache","HIT")
-        return res.json(cachedData.data)
+    const cachedResponse = responseCache.get(cacheKey);
+    if (cachedResponse && Date.now() <= cachedResponse.expiresAt) {
+        response.set("Cache", "HIT");
+        return response.json(cachedResponse.payload);
     }
 
-    else if (cachedData && Date.now()>cachedData.expiresAt){
-        // console.log("new value assgined")
-        delete cache[url] 
+    if (cachedResponse) {
+        responseCache.delete(cacheKey);
     }
 
-    res.set("cache","MISS")
-    originalJSON  = res.json.bind(res)
-    res.json = (data) => {
-        cache[url] = {
-            data ,
-            expiresAt : Date.now()+(60*1000),  
-        } 
-        return originalJSON(data)
-    }
-    next()
-}
+    response.set("Cache", "MISS");
+    const sendJson = response.json.bind(response);
+    response.json = (payload) => {
+        responseCache.set(cacheKey, {
+            payload,
+            expiresAt: Date.now() + cacheLifetimeMs
+        });
+        return sendJson(payload);
+    };
+    next();
+};
 
 module.exports = {
-    productsCache
-}
+    cacheProducts
+};

@@ -1,46 +1,73 @@
-const productServices = require("../services/products.service")
+const productService = require("../services/products.service");
 
-const getProducts = async(req,res) => {
-    const products = await productServices.QueryProduct(req.query)
-    res.json(products)
-}
+const getProducts = async (request, response, next) => {
+    try {
+        const productList = await productService.queryProducts(request.query);
+        response.json(productList);
+    } catch (error) {
+        next(error);
+    }
+};
 
-const getProductId = async(req,res)=>{
-    let id = Number(req.params.id)
-    let productID = await productServices.findProductId(id)
-    res.json(productID)
-}
+const getProductById = async (request, response, next) => {
+    try {
+        const productId = Number(request.params.id);
+        const matchingProduct = await productService.findProductById(productId);
+        response.json(matchingProduct);
+    } catch (error) {
+        next(error);
+    }
+};
 
-const insertProducts = async(req,res)=>{
-    let product = await productServices.insertIntoProducts(req.body)
-    res.status(201).json(product)
-}
+const createProduct = async (request, response, next) => {
+    try {
+        const createdProduct = await productService.createProduct(request.body);
+        response.status(201).json(createdProduct);
+    } catch (error) {
+        next(error);
+    }
+};
 
-const putProduct = async(req,res)=>{
-    let id = Number(req.params.id)
-    let price = Number(req.body.price)
-    let name = req.body.name
-    let updatedProduct = await productServices.putIntoProduct({id,name,price})
-    res.status(200).json(updatedProduct)
-}
+const replaceProduct = async (request, response, next) => {
+    try {
+        const productId = Number(request.params.id);
+        const replacement = {
+            id: productId,
+            name: request.body.name,
+            price: Number(request.body.price)
+        };
+        const savedProduct = await productService.replaceProduct(replacement);
+        response.json(savedProduct);
+    } catch (error) {
+        next(error);
+    }
+};
 
-const patchProduct = async(req,res)=>{
-    let id = Number(req.params.id)
-    let updatedProduct = await productServices.patchIntoProduct(req.body,id)
-    res.status(200).json(updatedProduct)
-}
+const updateProductFields = async (request, response, next) => {
+    try {
+        const productId = Number(request.params.id);
+        const savedProduct = await productService.updateProductFields(request.body, productId);
+        response.json(savedProduct);
+    } catch (error) {
+        next(error);
+    }
+};
 
-const deleteProduct = async(req,res)=>{
-    let id = Number(req.params.id)
-    let deletedProduct = await productServices.deleteFromProduct(id)
-    res.status(200).json(deletedProduct)
-}
+const removeProduct = async (request, response, next) => {
+    try {
+        const productId = Number(request.params.id);
+        const removedProduct = await productService.removeProduct(productId);
+        response.json(removedProduct);
+    } catch (error) {
+        next(error);
+    }
+};
 
 module.exports = {
     getProducts,
-    getProductId,
-    insertProducts,
-    putProduct,
-    patchProduct,
-    deleteProduct
-}
+    getProductById,
+    createProduct,
+    replaceProduct,
+    updateProductFields,
+    removeProduct
+};
